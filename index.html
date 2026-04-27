@@ -3,1211 +3,914 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Binary Search Tree Visualizer</title>
+  <title>BST Visualizer — Interactive Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ========== CSS VARIABLES & THEME ========== */
     :root {
-      --bg: rgba(255, 255, 255, 0.7);
-      --bg2: rgba(255, 255, 255, 0.5);
-      --bg3: rgba(245, 245, 243, 0.3);
-      --text: #1a1a18;
-      --text2: #6b6b67;
-      --text3: #9c9a93;
-      --border: rgba(255,255,255,0.3);
-      --border2: rgba(0,0,0,0.12);
-      --radius: 16px;
-      --radius-lg: 20px;
-      --info-bg: rgba(230, 241, 251, 0.5);
-      --info-text: #185fa5;
-      --info-border: rgba(24,95,165,0.25);
-      --danger-bg: rgba(252, 235, 235, 0.5);
-      --danger-text: #a32d2d;
-      --danger-border: rgba(163,45,45,0.25);
-      --success-bg: rgba(234, 243, 222, 0.5);
-      --success-text: #3b6d11;
-      --success-border: rgba(59,109,17,0.25);
-      --warning-bg: rgba(250, 238, 218, 0.5);
-      --warning-text: #854f0b;
-      --glass-blur: 12px;
-      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --bg-color: #0f172a;
+      --panel-bg: #1e293b;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --node-bg: #1e293b;
+      --node-border: #3b82f6;
+      --node-text: #f8fafc;
+      --edge-color: #475569;
+      --glow-active: rgba(59, 130, 246, 0.6);
+      --font-main: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    
+    [data-theme="light"] {
+      --bg-color: #f1f5f9;
+      --panel-bg: #ffffff;
+      --text-color: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --node-bg: #ffffff;
+      --node-text: #0f172a;
+      --edge-color: #cbd5e1;
+      --glow-active: rgba(37, 99, 235, 0.4);
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: rgba(30, 30, 28, 0.8);
-        --bg2: rgba(42, 42, 40, 0.6);
-        --bg3: rgba(51, 51, 48, 0.4);
-        --text: #e8e6de;
-        --text2: #9c9a92;
-        --text3: #6b6b67;
-        --border: rgba(255,255,255,0.12);
-        --border2: rgba(255,255,255,0.08);
-        --info-bg: rgba(12, 68, 124, 0.5);
-        --info-text: #b5d4f4;
-        --info-border: rgba(181,212,244,0.2);
-        --danger-bg: rgba(121, 31, 31, 0.5);
-        --danger-text: #f7c1c1;
-        --danger-border: rgba(247,193,193,0.2);
-        --success-bg: rgba(39, 80, 10, 0.5);
-        --success-text: #c0dd97;
-        --success-border: rgba(192,221,151,0.2);
-        --warning-bg: rgba(99, 56, 6, 0.5);
-        --warning-text: #fac775;
-        --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
-      }
-    }
-
+    /* ========== RESET & BASE ========== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
-      color: var(--text);
-      min-height: 100vh;
-      padding: 16px;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    #app {
-      max-width: 960px;
-      margin: 0 auto;
-      background: var(--bg);
-      backdrop-filter: blur(var(--glass-blur));
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      position: relative;
-      z-index: 1;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    #app:hover {
-      background: rgba(255, 255, 255, 0.75);
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      #app:hover {
-        background: rgba(30, 30, 28, 0.85);
-      }
-    }
-
-    /* Header */
-    #header {
+      font-family: var(--font-main);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      height: 100vh;
+      overflow: hidden;
       display: flex;
-      align-items: flex-start;
+      flex-direction: column;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* ========== HEADER ========== */
+    header {
+      display: flex;
       justify-content: space-between;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    #title-block h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text);
-      display: flex;
       align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: fadeInDown 0.8s ease-out;
+      padding: 1rem 2rem;
+      background-color: var(--panel-bg);
+      border-bottom: 1px solid var(--edge-color);
+      z-index: 10;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    #title-block p {
-      font-size: 13px;
-      color: var(--text2);
-      margin-top: 4px;
-      animation: fadeInUp 0.8s ease-out 0.1s both;
-    }
-    .tag {
-      display: inline-block;
-      font-size: 11px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      backdrop-filter: blur(8px);
-      transition: all 0.3s ease;
-    }
-    .tag.blue { 
-      background: var(--info-bg); 
-      color: var(--info-text);
-      border: 1px solid var(--info-border);
-    }
-    .tag.amber { 
-      background: var(--warning-bg); 
-      color: var(--warning-text);
-      border: 1px solid rgba(133, 79, 11, 0.2);
-    }
-    .tag.red { 
-      background: var(--danger-bg); 
-      color: var(--danger-text);
-      border: 1px solid var(--danger-border);
-    }
-    .tag.green { 
-      background: var(--success-bg); 
-      color: var(--success-text);
-      border: 1px solid var(--success-border);
-    }
-    .tag:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    }
-
-    /* Controls */
-    #controls {
+    .logo { display: flex; align-items: center; gap: 0.5rem; }
+    .logo h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header-right { display: flex; align-items: center; gap: 1.5rem; }
+    .theme-toggle { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-color); transition: transform 0.2s; }
+    .theme-toggle:hover { transform: scale(1.1); }
+    
+    /* ========== LAYOUT ========== */
+    .main-container {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    input[type=number] {
-      width: 90px;
-      height: 40px;
-      padding: 0 12px;
-      font-size: 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(8px);
-      color: var(--text);
-      outline: none;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-    input[type=number]:focus { 
-      border-color: #667eea;
-      background: rgba(255, 255, 255, 0.5);
-      box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
-      transform: translateY(-2px);
-    }
-    input[type=number]::placeholder {
-      color: var(--text3);
-    }
-    .btn {
-      height: 40px;
-      padding: 0 18px;
-      font-size: 13px;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      white-space: nowrap;
-      position: relative;
+      flex: 1;
       overflow: hidden;
     }
-    .btn::before {
-      content: '';
+    .panel {
+      width: 320px;
+      background-color: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--edge-color);
+      transition: all 0.3s;
+      z-index: 5;
+    }
+    .explanation-panel { border-right: none; border-left: 1px solid var(--edge-color); width: 350px; }
+    .panel-header { padding: 1rem; border-bottom: 1px solid var(--edge-color); font-weight: 600; }
+    .panel-content { padding: 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
+    
+    /* ========== VISUALIZATION AREA ========== */
+    .visualization-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.2) 100%);
+    }
+    .tree-container {
       position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4));
-      transition: left 0.6s ease;
-      z-index: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
+      overflow: auto;
     }
-    .btn:hover {
-      background: rgba(255, 255, 255, 0.4);
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+    .edges-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
     }
-    .btn:hover::before {
-      left: 100%;
-    }
-    .btn:active { 
-      transform: translateY(-1px);
-    }
-    .btn.primary { 
-      background: rgba(150, 150, 150, 0.15);
-      border-color: rgba(128, 128, 128, 0.2);
-      color: var(--text);
-      font-weight: 600;
-    }
-    .btn.primary:hover {
-      background: rgba(150, 150, 150, 0.25);
-      box-shadow: 0 8px 24px rgba(128, 128, 128, 0.15);
-    }
-    .btn.danger  { 
-      background: rgba(140, 140, 140, 0.15);
-      border-color: rgba(120, 120, 120, 0.2);
-      color: var(--text);
-      font-weight: 600;
-    }
-    .btn.danger:hover {
-      background: rgba(140, 140, 140, 0.25);
-      box-shadow: 0 8px 24px rgba(120, 120, 120, 0.15);
-    }
-    .btn.success { 
-      background: rgba(160, 160, 160, 0.15);
-      border-color: rgba(135, 135, 135, 0.2);
-      color: var(--text);
-      font-weight: 600;
-    }
-    .btn.success:hover {
-      background: rgba(160, 160, 160, 0.25);
-      box-shadow: 0 8px 24px rgba(135, 135, 135, 0.15);
-    }
-    .btn:disabled { 
-      opacity: 0.5; 
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Speed */
-    #speed-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text2);
-      margin-left: auto;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      padding: 8px 14px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      font-weight: 500;
-    }
-    input[type=range] {
-      width: 90px;
-      accent-color: #667eea;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    input[type=range]:hover {
-      transform: scale(1.05);
-    }
-
-    /* SVG Canvas */
-    #canvas-wrap {
-      width: 100%;
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(6px);
-      min-height: 300px;
-      margin-bottom: 16px;
-      box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-    }
-    #canvas-wrap:hover {
-      background: rgba(255, 255, 255, 0.15);
-      box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.08);
-    }
-    #tree-svg { 
-      display: block; 
-      min-width: 100%;
-    }
-
-    /* Tutor Panel */
-    #tutor {
-      padding: 16px 20px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      min-height: 60px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
-      animation: slideUp 0.6s ease-out;
-    }
-    #tutor:hover {
-      background: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    }
-    #tutor-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-      display: inline-block;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    #tutor-text {
-      font-size: 14px;
-      color: var(--text);
-      line-height: 1.6;
-      font-weight: 500;
-    }
-
-    /* Bottom bar */
-    /* Greeting Section */
-    #greeting {
-      background: rgba(150, 150, 150, 0.08);
-      border: 1px solid rgba(150, 150, 150, 0.15);
-      border-radius: var(--radius-lg);
-      padding: 16px 20px;
-      margin-bottom: 18px;
-      backdrop-filter: blur(8px);
-      animation: slideDown 0.6s ease-out;
-    }
-    #greeting h2 {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    #greeting p {
-      font-size: 13px;
-      color: var(--text2);
-      line-height: 1.5;
+    .nodes-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
     }
     
-    /* Footer */
-    #footer {
-      margin-top: 24px;
-      padding-top: 18px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      opacity: 0.8;
-      animation: fadeInUp 0.8s ease-out 0.4s both;
-    }
-    #footer p {
-      font-size: 12px;
-      color: var(--text2);
-      margin-bottom: 8px;
-    }
-    #footer-credit {
-      font-size: 13px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    #bottom-bar {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      animation: slideUp 0.8s ease-out 0.2s both;
-    }
-
-    /* Traversals */
-    #traversal-box {
-      flex: 1;
-      min-width: 200px;
-      padding: 16px 20px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
-    }
-    #traversal-box:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-    }
-    .box-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-      display: inline-block;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .trav-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-    .trav-name { 
-      width: 78px; 
-      color: var(--text2); 
-      flex-shrink: 0; 
-      font-weight: 600;
-    }
-    .trav-btn {
-      padding: 4px 12px;
-      font-size: 12px;
-      border: 1px solid rgba(102, 126, 234, 0.3);
-      border-radius: 20px;
-      background: rgba(102, 126, 234, 0.1);
-      cursor: pointer;
-      color: #667eea;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      font-weight: 600;
-    }
-    .trav-btn:hover { 
-      background: rgba(102, 126, 234, 0.2);
-      border-color: rgba(102, 126, 234, 0.6);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
-    }
-    .trav-btn:active {
-      transform: translateY(0);
-    }
-    .trav-result {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 12px;
-      color: var(--text);
-      flex: 1;
-      word-break: break-all;
-      font-weight: 500;
-    }
-
-    /* Info box */
-    #info-box {
-      padding: 16px 20px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
-      min-width: 160px;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
-    }
-    #info-box:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 6px;
-      font-size: 13px;
-    }
-    .info-key { 
-      color: var(--text2);
-      font-weight: 600;
-    }
-    .info-val { 
-      font-weight: 700; 
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 12px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* Legend */
-    #legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 16px;
-      font-size: 12px;
-      color: var(--text2);
-    }
-    .legend-item { 
-      display: flex; 
-      align-items: center; 
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 4px 10px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(6px);
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-    .legend-item:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateY(-2px);
-    }
-    .legend-dot {
-      width: 12px; 
-      height: 12px;
+    /* ========== NODES & EDGES ========== */
+    .node {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: var(--node-bg);
+      border: 3px solid var(--node-border);
       border-radius: 50%;
-      border: 2px solid;
-      flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--node-text);
+      transform: translate(-50%, -50%);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+    
+    /* Node states */
+    .node.active { border-color: var(--warning); box-shadow: 0 0 20px var(--warning); transform: translate(-50%, -50%) scale(1.1); z-index: 10; }
+    .node.found { border-color: var(--success); box-shadow: 0 0 20px var(--success); transform: translate(-50%, -50%) scale(1.2); z-index: 10; }
+    .node.deleting { border-color: var(--danger); opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    .node.inserting { animation: dropIn 0.5s ease-out forwards; }
+    
+    @keyframes dropIn {
+      0% { opacity: 0; transform: translate(-50%, -150px) scale(0.5); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
-    /* Animations */
-    @keyframes nodeIn   { 
-      from { 
-        opacity: 0; 
-        transform: scale(0.2) rotate(-180deg);
-      } 
-      to { 
-        opacity: 1; 
-        transform: scale(1) rotate(0deg);
-      } 
+    .edge {
+      stroke: var(--edge-color);
+      stroke-width: 3;
+      transition: all 0.5s ease;
     }
-    @keyframes edgeIn   { 
-      from { 
-        stroke-dashoffset: 200;
-        opacity: 0;
-      } 
-      to { 
-        stroke-dashoffset: 0;
-        opacity: 1;
-      } 
+    .edge.active { stroke: var(--warning); stroke-width: 5; }
+
+    /* ========== UI CONTROLS ========== */
+    .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .input-group label { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+    input[type="number"] {
+      width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--edge-color);
+      background: var(--bg-color); color: var(--text-color); font-family: var(--font-mono); font-size: 1rem;
+      outline: none; transition: border-color 0.2s;
     }
-    @keyframes fadeOut  { 
-      to   { 
-        opacity: 0; 
-        transform: scale(0.1) rotate(180deg);
-      } 
+    input[type="number"]:focus { border-color: var(--primary); }
+    
+    .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .button-group.full { grid-template-columns: 1fr; }
+    .btn {
+      padding: 0.75rem; border-radius: 8px; border: none; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: all 0.2s; color: #fff;
     }
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .btn:active { transform: translateY(2px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-insert { background-color: var(--success); }
+    .btn-insert:hover:not(:disabled) { background-color: #059669; }
+    .btn-delete { background-color: var(--danger); }
+    .btn-delete:hover:not(:disabled) { background-color: #dc2626; }
+    .btn-search { background-color: var(--primary); grid-column: span 2;}
+    .btn-search:hover:not(:disabled) { background-color: var(--primary-hover); }
+    .btn-traverse { background-color: #8b5cf6; }
+    .btn-traverse:hover:not(:disabled) { background-color: #7c3aed; }
+    .btn-reset { background-color: transparent; border: 1px solid var(--edge-color); color: var(--text-color); }
+    .btn-reset:hover:not(:disabled) { background-color: rgba(255,255,255,0.1); }
+    
+    /* Speed Control */
+    .speed-control { display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem; }
+    .speed-control input { flex: 1; cursor: pointer; }
+    
+    /* ========== TUTOR / EXPLANATION ========== */
+    .tutor-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .avatar { font-size: 2.5rem; }
+    .speech-bubble {
+      background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary);
+      border-radius: 12px; padding: 1rem; font-size: 0.95rem; line-height: 1.5;
+      min-height: 80px; position: relative;
     }
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .speech-bubble::before {
+      content: ''; position: absolute; top: 20px; left: -10px;
+      border-width: 10px 10px 10px 0; border-style: solid;
+      border-color: transparent var(--primary) transparent transparent;
     }
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    
+    .log-container {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;
+      padding-right: 0.5rem; font-family: var(--font-mono); font-size: 0.85rem;
     }
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.7;
-      }
+    .log-entry { padding: 0.5rem; border-radius: 6px; background: rgba(0,0,0,0.2); border-left: 3px solid var(--primary); animation: slideIn 0.3s ease; }
+    .log-entry.success { border-color: var(--success); }
+    .log-entry.warning { border-color: var(--warning); }
+    .log-entry.danger { border-color: var(--danger); }
+    
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* Floating bubble near nodes */
+    .node-speech {
+      position: absolute; background: var(--panel-bg); color: var(--text-color);
+      padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid var(--primary);
+      font-size: 0.8rem; font-weight: 500; pointer-events: none; opacity: 0;
+      transform: translate(-50%, -100px); transition: all 0.3s; z-index: 20;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); white-space: nowrap;
     }
+    .node-speech.visible { opacity: 1; transform: translate(-50%, -60px); }
+
+    /* Traversal Output */
+    .traversal-output {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--panel-bg); padding: 1rem 2rem; border-radius: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid var(--primary);
+      display: flex; gap: 0.5rem; align-items: center; z-index: 30; opacity: 0; transition: opacity 0.3s;
+    }
+    .traversal-output.visible { opacity: 1; }
+    .traversal-item {
+      display: inline-flex; justify-content: center; align-items: center;
+      width: 35px; height: 35px; background: var(--primary); color: #fff;
+      border-radius: 50%; font-family: var(--font-mono); font-weight: bold;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
   </style>
 </head>
-<body>
+<body data-theme="dark">
 
-<div id="app">
-
-  <!-- Header -->
-  <div id="header">
-    <div id="title-block">
-      <h1>Binary Search Tree <span class="tag blue">BST</span></h1>
-      <p>Interactive step-by-step visualization — Insert · Delete · Search · Traverse</p>
+  <header>
+    <div class="logo">
+      <span style="font-size: 1.8rem;">🌳</span>
+      <h1>BST Visualizer</h1>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <div id="speed-wrap">
-        <span>Speed</span>
-        <input type="range" id="speed" min="150" max="1400" value="700" step="50">
-        <span id="speed-label" style="min-width:28px;font-size:11px">—</span>
-      </div>
-      <button class="btn" onclick="loadPreset()">Load sample</button>
-      <button class="btn" onclick="resetTree()">Reset</button>
+    <div class="header-right">
+      <button class="theme-toggle" id="themeBtn" title="Toggle Theme">☀️</button>
     </div>
-  </div>
+  </header>
 
-  <!-- Greeting -->
-  <div id="greeting">
-    <h2>👋 Welcome to BST Visualizer!</h2>
-    <p>Explore binary search trees interactively. Insert, delete, and search values while watching the tree structure evolve in real-time with smooth animations.</p>
-  </div>
+  <div class="main-container">
+    <!-- LEFT PANEL: CONTROLS -->
+    <aside class="panel control-panel">
+      <div class="panel-header">🎮 Controls</div>
+      <div class="panel-content">
+        <div class="input-group">
+          <label>Node Value (0-999)</label>
+          <input type="number" id="nodeValue" placeholder="e.g. 42" onkeypress="handleEnter(event)">
+        </div>
+        <div class="button-group">
+          <button class="btn btn-insert" id="btnInsert" onclick="insertNode()">➕ Insert</button>
+          <button class="btn btn-delete" id="btnDelete" onclick="deleteNode()">🗑️ Delete</button>
+          <button class="btn btn-search" id="btnSearch" onclick="searchNode()">🔍 Search</button>
+        </div>
+        
+        <div style="margin-top: 1rem; border-top: 1px solid var(--edge-color); padding-top: 1.5rem;">
+          <label style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500; margin-bottom:0.5rem; display:block;">Traversals</label>
+          <div class="button-group full">
+            <button class="btn btn-traverse" onclick="traverse('inorder')">Inorder (L N R)</button>
+            <button class="btn btn-traverse" onclick="traverse('preorder')">Preorder (N L R)</button>
+            <button class="btn btn-traverse" onclick="traverse('postorder')">Postorder (L R N)</button>
+          </div>
+        </div>
 
-  <!-- Controls -->
-  <div id="controls">
-    <input type="number" id="val-input" placeholder="Value" min="-9999" max="9999">
-    <button class="btn primary" id="btn-insert" onclick="doInsert()">Insert</button>
-    <button class="btn danger"  id="btn-delete" onclick="doDelete()">Delete</button>
-    <button class="btn success" id="btn-search" onclick="doSearch()">Search</button>
-  </div>
+        <div style="margin-top: 1rem; border-top: 1px solid var(--edge-color); padding-top: 1.5rem;">
+          <label style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Animation Speed</label>
+          <div class="speed-control">
+            <span>🐢</span>
+            <input type="range" id="speedSlider" min="1" max="10" value="5">
+            <span>🐇</span>
+          </div>
+        </div>
 
-  <!-- Legend -->
-  <div id="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#FAC775;border-color:#BA7517"></div> Current</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#B5D4F4;border-color:#185FA5"></div> Go left</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#F5C4B3;border-color:#993C1D"></div> Go right</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#C0DD97;border-color:#3B6D11"></div> Found / Inserted</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#F7C1C1;border-color:#A32D2D"></div> Deleting</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#AFA9EC;border-color:#534AB7"></div> Successor</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#9FE1CB;border-color:#0F6E56"></div> Traversal</div>
-  </div>
-
-  <!-- SVG Canvas -->
-  <div id="canvas-wrap">
-    <svg id="tree-svg" height="280" xmlns="http://www.w3.org/2000/svg"></svg>
-  </div>
-
-  <!-- Tutor -->
-  <div id="tutor">
-    <div id="tutor-label">Tutor</div>
-    <div id="tutor-text">Welcome! Load a sample tree or insert your own values. Use Insert, Delete, Search, and Traversals to explore BST operations step-by-step.</div>
-  </div>
-
-  <!-- Bottom bar -->
-  <div id="bottom-bar">
-    <div id="traversal-box">
-      <div class="box-label">Traversals</div>
-      <div class="trav-row">
-        <span class="trav-name">Inorder</span>
-        <button class="trav-btn" onclick="doTraversal('inorder')">Run ▶</button>
-        <span class="trav-result" id="tr-inorder">—</span>
+        <div style="margin-top: auto; padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+           <button class="btn btn-reset full" style="width: 100%;" onclick="loadSampleTree()">🌲 Load Sample Tree</button>
+           <button class="btn btn-reset full" style="width: 100%;" onclick="resetTree()">🔄 Reset Tree</button>
+           <div style="text-align: center; margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+             Made for learning by Harjas Singh
+           </div>
+        </div>
       </div>
-      <div class="trav-row">
-        <span class="trav-name">Preorder</span>
-        <button class="trav-btn" onclick="doTraversal('preorder')">Run ▶</button>
-        <span class="trav-result" id="tr-preorder">—</span>
-      </div>
-      <div class="trav-row">
-        <span class="trav-name">Postorder</span>
-        <button class="trav-btn" onclick="doTraversal('postorder')">Run ▶</button>
-        <span class="trav-result" id="tr-postorder">—</span>
-      </div>
-    </div>
+    </aside>
 
-    <div id="info-box">
-      <div class="box-label">Tree Info</div>
-      <div class="info-row"><span class="info-key">Nodes</span><span class="info-val" id="info-nodes">0</span></div>
-      <div class="info-row"><span class="info-key">Height</span><span class="info-val" id="info-height">0</span></div>
-      <div class="info-row"><span class="info-key">Min</span><span class="info-val" id="info-min">—</span></div>
-      <div class="info-row"><span class="info-key">Max</span><span class="info-val" id="info-max">—</span></div>
-      <div class="info-row"><span class="info-key">Search</span><span class="info-val" id="info-complexity">—</span></div>
-    </div>
+    <!-- CENTER AREA: VISUALIZATION -->
+    <main class="visualization-area" id="visArea">
+      <div class="tree-container">
+        <svg class="edges-layer" id="edgesLayer"></svg>
+        <div class="nodes-layer" id="nodesLayer"></div>
+      </div>
+      <div class="node-speech" id="floatingSpeech">Hello!</div>
+      
+      <div class="traversal-output" id="traversalOutput">
+        <strong style="color: var(--text-muted); margin-right: 10px;" id="traversalLabel">Result:</strong>
+        <div id="traversalContainer" style="display: flex; gap: 5px;"></div>
+      </div>
+    </main>
+
+    <!-- RIGHT PANEL: TUTOR -->
+    <aside class="panel explanation-panel">
+      <div class="panel-header">🎓 Tutor</div>
+      <div class="panel-content" style="padding: 1rem;">
+        <div class="tutor-header">
+          <div class="avatar">🤖</div>
+          <div class="speech-bubble" id="tutorText">
+            Welcome to the BST Visualizer! Enter a number and click Insert to build your tree.
+          </div>
+        </div>
+        
+        <h4 style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid var(--edge-color); padding-bottom: 0.5rem;">Execution Log</h4>
+        <div class="log-container" id="logContainer">
+          <!-- Logs go here -->
+        </div>
+      </div>
+    </aside>
   </div>
 
-  <!-- Footer -->
-  <div id="footer">
-    <p>Designed with ❤️ for learning</p>
-    <div id="footer-credit">✨ Created by Harjas Singh</div>
-  </div>
+  <script>
+    // ========== STATE & CONFIG ==========
+    const Config = {
+      nodeRadius: 25,
+      levelHeight: 80,
+      minSiblingDist: 60,
+      animationSpeedMs: 800
+    };
 
-</div><!-- /app -->
-
-<script>
-// ==================== BST LOGIC ====================
-
-class BSTNode {
-  constructor(val) { this.val = val; this.left = null; this.right = null; }
-}
-
-let root = null;
-let busy = false;
-let nodeEls = {}; // id -> {g, circle, text}
-let edgeEls = {}; // id -> line
-
-const svg = document.getElementById('tree-svg');
-const R = 22, PY = 72, PAD = 30;
-
-// Speed helper
-function animSpeed() { return parseInt(document.getElementById('speed').value); }
-function delay(ms)   { return new Promise(r => setTimeout(r, ms)); }
-
-// Update speed label
-document.getElementById('speed').addEventListener('input', function() {
-  let v = parseInt(this.value);
-  let label = v <= 300 ? 'fast' : v >= 1100 ? 'slow' : 'mid';
-  document.getElementById('speed-label').textContent = label;
-});
-document.getElementById('speed-label').textContent = 'mid';
-
-// ---- Core BST operations ----
-function insertBST(node, val) {
-  if (!node) return new BSTNode(val);
-  if (val < node.val) node.left  = insertBST(node.left, val);
-  else if (val > node.val) node.right = insertBST(node.right, val);
-  return node;
-}
-
-function findMin(node) { while (node.left) node = node.left; return node; }
-
-function deleteBST(node, val) {
-  if (!node) return null;
-  if (val < node.val) { node.left  = deleteBST(node.left, val);  return node; }
-  if (val > node.val) { node.right = deleteBST(node.right, val); return node; }
-  // Found
-  if (!node.left && !node.right) return null;
-  if (!node.left)  return node.right;
-  if (!node.right) return node.left;
-  // Two children: inorder successor
-  let suc = findMin(node.right);
-  node.val = suc.val;
-  node.right = deleteBST(node.right, suc.val);
-  return node;
-}
-
-function searchBST(node, val) {
-  if (!node || node.val === val) return node;
-  return val < node.val ? searchBST(node.left, val) : searchBST(node.right, val);
-}
-
-function getHeight(node)     { if (!node) return 0; return 1 + Math.max(getHeight(node.left), getHeight(node.right)); }
-function countNodes(node)    { if (!node) return 0; return 1 + countNodes(node.left) + countNodes(node.right); }
-function getMin(node)        { if (!node) return null; while (node.left) node = node.left; return node.val; }
-function getMax(node)        { if (!node) return null; while (node.right) node = node.right; return node.val; }
-function inorder(node, a=[]) { if (node) { inorder(node.left, a); a.push(node.val); inorder(node.right, a); } return a; }
-function preorder(node, a=[]){ if (node) { a.push(node.val); preorder(node.left, a); preorder(node.right, a); } return a; }
-function postorder(node, a)  { if (!a) a=[]; if (node) { postorder(node.left, a); postorder(node.right, a); a.push(node.val); } return a; }
-
-
-
-// ---- Layout ----
-function assignPositions(node, depth, left, right, map) {
-  if (!node) return;
-  let mid = (left + right) / 2;
-  map.set(node, { x: mid, y: depth });
-  assignPositions(node.left,  depth + 1, left, mid,   map);
-  assignPositions(node.right, depth + 1, mid,  right, map);
-}
-
-function getLayout() {
-  let map = new Map();
-  let h = getHeight(root) || 1;
-  let width = Math.max(700, Math.pow(2, h) * 48);
-  assignPositions(root, 0, 0, width, map);
-  return { map, width, h };
-}
-
-function toSvgX(x, width, svgW) { return PAD + x * (svgW - 2 * PAD) / width; }
-function toSvgY(d)               { return PAD + d * PY; }
-
-// ---- Rendering ----
-function render(highlights = {}) {
-  let { map, width, h } = getLayout();
-  let svgW = Math.max(600, width * 0.52 + 2 * PAD);
-  let svgH = Math.max(220, (h + 0.5) * PY + PAD * 2);
-
-  svg.setAttribute('width',   svgW);
-  svg.setAttribute('height',  svgH);
-  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
-
-  let liveNodes = new Set();
-  let liveEdges = new Set();
-
-  // Draw edges first (behind nodes)
-  map.forEach((pos, node) => {
-    [node.left, node.right].forEach(child => {
-      if (!child) return;
-      let eid = 'e' + node.val + '_' + child.val;
-      liveEdges.add(eid);
-      let cx1 = toSvgX(pos.x, width, svgW), cy1 = toSvgY(pos.y);
-      let cpos = map.get(child);
-      let cx2 = toSvgX(cpos.x, width, svgW), cy2 = toSvgY(cpos.y);
-
-      // Offset to circle edge
-      let dx = cx2 - cx1, dy = cy2 - cy1, dist = Math.sqrt(dx*dx + dy*dy);
-      let ox = dx / dist * R, oy = dy / dist * R;
-
-      if (!edgeEls[eid]) {
-        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('stroke-dasharray', '200');
-        line.setAttribute('stroke-dashoffset', '200');
-        line.style.animation = 'edgeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both';
-        svg.insertBefore(line, svg.firstChild);
-        edgeEls[eid] = line;
-      }
-      let line = edgeEls[eid];
-      line.setAttribute('x1', cx1 + ox); line.setAttribute('y1', cy1 + oy);
-      line.setAttribute('x2', cx2 - ox); line.setAttribute('y2', cy2 - oy);
-      line.setAttribute('stroke', 'rgba(128,128,120,0.4)');
-      line.setAttribute('stroke-width', '1.5');
-      line.setAttribute('fill', 'none');
-      if (line.parentNode === svg) svg.insertBefore(line, svg.firstChild);
+    let treeRoot = null;
+    let isAnimating = false;
+    
+    // DOM Elements
+    const nodesLayer = document.getElementById('nodesLayer');
+    const edgesLayer = document.getElementById('edgesLayer');
+    const nodeInput = document.getElementById('nodeValue');
+    const tutorText = document.getElementById('tutorText');
+    const logContainer = document.getElementById('logContainer');
+    const floatingSpeech = document.getElementById('floatingSpeech');
+    const speedSlider = document.getElementById('speedSlider');
+    const themeBtn = document.getElementById('themeBtn');
+    
+    // Update speed based on slider (1: slow, 10: fast)
+    speedSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value);
+      // Map 1-10 to 1500ms - 100ms
+      Config.animationSpeedMs = 1500 - ((val - 1) * 155);
     });
-  });
 
-  // Draw nodes
-  map.forEach((pos, node) => {
-    let id = 'nd' + node.val;
-    liveNodes.add(id);
-    let cx = toSvgX(pos.x, width, svgW);
-    let cy = toSvgY(pos.y);
-    let hl = highlights[node.val] || '';
-
-    if (!nodeEls[id]) {
-      let g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      g.id = id;
-      let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('r', R);
-      let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('dominant-baseline', 'central');
-      text.style.fontSize   = '14px';
-      text.style.fontWeight = '700';
-      text.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      text.style.pointerEvents = 'none';
-      g.appendChild(circle);
-      g.appendChild(text);
-      svg.appendChild(g);
-      g.style.transformOrigin = `${cx}px ${cy}px`;
-      g.style.animation = 'nodeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both';
-      nodeEls[id] = { g, circle, text };
-    }
-
-    let { g, circle, text } = nodeEls[id];
-    g.setAttribute('transform', `translate(${cx},${cy})`);
-
-    // Color based on highlight with better styling
-    let fill = 'var(--bg)', stroke = 'rgba(128,128,120,0.3)', textColor = 'var(--text)', strokeW = 2, filter = '';
-    if (hl === 'current')    { fill='#FAC775'; stroke='#BA7517'; textColor='#271c00'; strokeW=2.5; filter='drop-shadow(0 4px 12px rgba(250, 199, 117, 0.4))'; }
-    else if (hl === 'left')  { fill='#B5D4F4'; stroke='#185FA5'; textColor='#042C53'; strokeW=2.5; filter='drop-shadow(0 4px 12px rgba(181, 212, 244, 0.4))'; }
-    else if (hl === 'right') { fill='#F5C4B3'; stroke='#993C1D'; textColor='#4A1B0C'; strokeW=2.5; filter='drop-shadow(0 4px 12px rgba(245, 196, 179, 0.4))'; }
-    else if (hl === 'found') { fill='#C0DD97'; stroke='#3B6D11'; textColor='#173404'; strokeW=2.5; filter='drop-shadow(0 4px 12px rgba(192, 221, 151, 0.4))'; }
-    else if (hl === 'delete'){ fill='#F7C1C1'; stroke='#A32D2D'; textColor='#501313'; strokeW=2.5; filter='drop-shadow(0 4px 12px rgba(247, 193, 193, 0.4))'; }
-    else if (hl === 'successor'){fill='#AFA9EC';stroke='#534AB7';textColor='#26215C'; strokeW=2.5; filter='drop-shadow(0 4px 12px rgba(175, 169, 236, 0.4))'; }
-    else if (hl === 'visited'){ fill='var(--bg3)'; stroke='rgba(128,128,120,0.15)'; textColor='var(--text3)'; strokeW=1.5; }
-    else if (hl === 'traversal'){ fill='#9FE1CB'; stroke='#0F6E56'; textColor='#04342C'; strokeW=2.5; filter='drop-shadow(0 4px 12px rgba(159, 225, 203, 0.4))'; }
-
-    circle.setAttribute('fill',         fill);
-    circle.setAttribute('stroke',       stroke);
-    circle.setAttribute('stroke-width', strokeW);
-    g.setAttribute('filter', filter);
-    text.textContent = node.val;
-    text.setAttribute('fill', textColor);
-  });
-
-  // Remove stale nodes
-  Object.keys(nodeEls).forEach(id => {
-    if (!liveNodes.has(id)) {
-      let el = nodeEls[id].g;
-      if (el) {
-        el.style.animation = 'fadeOut 0.5s cubic-bezier(0.6, 0, 0.4, 1) both';
-        setTimeout(() => el.remove(), 520);
+    // Theme toggle
+    themeBtn.addEventListener('click', () => {
+      const body = document.body;
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.setAttribute('data-theme', 'light');
+        themeBtn.innerText = '🌙';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeBtn.innerText = '☀️';
       }
-      delete nodeEls[id];
-    }
-  });
-  Object.keys(edgeEls).forEach(id => {
-    if (!liveEdges.has(id)) {
-      let el = edgeEls[id];
-      if (el) { el.style.transition = 'opacity 0.4s ease-in'; el.style.opacity = '0'; setTimeout(() => el.remove(), 420); }
-      delete edgeEls[id];
-    }
-  });
+    });
 
-  updateInfo();
-}
-
-function updateInfo() {
-  let n = countNodes(root), h = getHeight(root);
-  document.getElementById('info-nodes').textContent = n;
-  document.getElementById('info-height').textContent = h;
-  let mn = getMin(root), mx = getMax(root);
-  document.getElementById('info-min').textContent = mn !== null ? mn : '—';
-  document.getElementById('info-max').textContent = mx !== null ? mx : '—';
-  if (!n) { document.getElementById('info-complexity').textContent = '—'; return; }
-  let expected = Math.ceil(Math.log2(n + 1));
-  document.getElementById('info-complexity').textContent = h <= expected + 1 ? 'O(log n)' : 'O(n) skewed';
-}
-
-function tutor(msg) { document.getElementById('tutor-text').textContent = msg; }
-
-function setBusy(val) {
-  busy = val;
-  ['btn-insert','btn-delete','btn-search'].forEach(id => {
-    document.getElementById(id).disabled = val;
-  });
-}
-
-// ---- Path tracing helpers ----
-function getPathTo(val) {
-  let path = [];
-  let node = root;
-  while (node) {
-    path.push(node.val);
-    if (val === node.val) break;
-    node = val < node.val ? node.left : node.right;
-  }
-  return path;
-}
-
-// ==================== ANIMATED OPERATIONS ====================
-
-async function animatedInsert(val) {
-  if (busy) return;
-  setBusy(true);
-
-  // Check duplicate
-  if (searchBST(root, val)) {
-    tutor(`⚠ Value ${val} already exists in the tree. Duplicates are not allowed in a BST.`);
-    render(); setBusy(false); return;
-  }
-
-  if (!root) {
-    root = insertBST(root, val);
-    render({ [val]: 'found' });
-    tutor(`Tree is empty! ${val} becomes the root node. 🌱`);
-    await delay(animSpeed());
-    render();
-    setBusy(false); return;
-  }
-
-  let path = getPathTo(val);
-
-  for (let i = 0; i < path.length; i++) {
-    let nv = path[i];
-    let hl = {};
-    path.slice(0, i).forEach(v => hl[v] = 'visited');
-
-    if (i < path.length - 1) {
-      let next = path[i + 1];
-      hl[nv] = next < nv ? 'left' : 'right';
-      render(hl);
-      if (next < nv) tutor(`At node ${nv}: ${val} < ${nv} → go LEFT ⬅`);
-      else           tutor(`At node ${nv}: ${val} > ${nv} → go RIGHT ➡`);
-    } else {
-      hl[nv] = 'current';
-      render(hl);
-      if (val < nv) tutor(`At node ${nv}: ${val} < ${nv} → insert as LEFT child! ⬅`);
-      else          tutor(`At node ${nv}: ${val} > ${nv} → insert as RIGHT child! ➡`);
-    }
-    await delay(animSpeed());
-  }
-
-  root = insertBST(root, val);
-  let finalHl = {};
-  path.forEach(v => finalHl[v] = 'visited');
-  finalHl[val] = 'found';
-  render(finalHl);
-  await delay(animSpeed() * 0.6);
-  render();
-  tutor(`✓ Node ${val} inserted! Inorder: [${inorder(root).join(', ')}]`);
-  setBusy(false);
-}
-
-async function animatedDelete(val) {
-  if (busy) return;
-  setBusy(true);
-
-  if (!searchBST(root, val)) {
-    tutor(`Value ${val} not found in the tree. Nothing to delete.`);
-    render(); setBusy(false); return;
-  }
-
-  let path = getPathTo(val);
-
-  // Animate search path
-  for (let i = 0; i < path.length; i++) {
-    let nv = path[i];
-    let hl = {};
-    path.slice(0, i).forEach(v => hl[v] = 'visited');
-    hl[nv] = nv === val ? 'delete' : 'current';
-    render(hl);
-    if (nv !== val) {
-      if (val < nv) tutor(`Searching for ${val}... at ${nv}, ${val} < ${nv} → go left ⬅`);
-      else          tutor(`Searching for ${val}... at ${nv}, ${val} > ${nv} → go right ➡`);
-    } else {
-      tutor(`Found node ${val}! Identifying deletion case...`);
-    }
-    await delay(animSpeed());
-  }
-
-  // Determine and explain case
-  let target = searchBST(root, val);
-  let extraHl = {};
-  path.slice(0, -1).forEach(v => extraHl[v] = 'visited');
-  extraHl[val] = 'delete';
-
-  if (!target.left && !target.right) {
-    tutor(`📌 Case 1 — LEAF node: ${val} has no children. Simply remove it!`);
-  } else if (!target.left || !target.right) {
-    let child = (target.left || target.right).val;
-    tutor(`📌 Case 2 — ONE child: Replace ${val} with its child (${child}).`);
-  } else {
-    let suc = findMin(target.right);
-    extraHl[suc.val] = 'successor';
-    tutor(`📌 Case 3 — TWO children: Find inorder successor (${suc.val}) — smallest in right subtree — copy its value, then delete it!`);
-  }
-
-  render(extraHl);
-  await delay(animSpeed() * 1.6);
-
-  root = deleteBST(root, val);
-  render();
-  await delay(300);
-  tutor(`✓ Node ${val} deleted and tree restructured! Inorder: [${inorder(root).join(', ')}]`);
-  setBusy(false);
-}
-
-async function animatedSearch(val) {
-  if (busy) return;
-  setBusy(true);
-
-  if (!root) { tutor('Tree is empty. Nothing to search.'); setBusy(false); return; }
-
-  let path = getPathTo(val);
-  let found = searchBST(root, val) !== null;
-
-  for (let i = 0; i < path.length; i++) {
-    let nv = path[i];
-    let hl = {};
-    path.slice(0, i).forEach(v => hl[v] = 'visited');
-
-    if (nv === val) {
-      hl[nv] = 'found';
-      render(hl);
-      tutor(`🎯 Found ${val} after ${i + 1} comparison(s)! ✓`);
-      await delay(animSpeed());
-      break;
+    // Handle Enter key in input
+    function handleEnter(e) {
+      if (e.key === 'Enter') insertNode();
     }
 
-    let isLast = (i === path.length - 1 && !found);
-    hl[nv] = 'current';
-    render(hl);
-
-    if (isLast) {
-      tutor(`At ${nv}: would go ${val < nv ? 'left' : 'right'} but subtree is null — ${val} NOT in tree. ✗`);
-    } else {
-      let next = path[i + 1];
-      if (next < nv) tutor(`At ${nv}: ${val} < ${nv} → go left ⬅`);
-      else           tutor(`At ${nv}: ${val} > ${nv} → go right ➡`);
+    // ========== UTILS ==========
+    const sleep = (ms = Config.animationSpeedMs) => new Promise(r => setTimeout(r, ms));
+    
+    function setControlsState(disabled) {
+      isAnimating = disabled;
+      document.querySelectorAll('.btn').forEach(b => b.disabled = disabled);
+      nodeInput.disabled = disabled;
     }
-    await delay(animSpeed());
-  }
 
-  if (!found) tutor(`✗ Value ${val} is not in the tree. Searched ${path.length} node(s).`);
-  await delay(animSpeed() * 0.8);
-  render();
-  setBusy(false);
-}
+    function addLog(msg, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `log-entry ${type}`;
+      div.innerText = msg;
+      logContainer.prepend(div);
+    }
 
-async function animatedTraversal(type) {
-  if (busy) return;
-  setBusy(true);
-  document.getElementById('tr-' + type).textContent = '...';
+    function updateTutor(msg) {
+      tutorText.innerText = msg;
+    }
 
-  let msgs = {
-    inorder:   'Inorder = Left → Root → Right. Always gives sorted output for a BST!',
-    preorder:  'Preorder = Root → Left → Right. Useful for copying or serializing the tree.',
-    postorder: 'Postorder = Left → Right → Root. Useful for deleting or evaluating trees.'
-  };
-  tutor(msgs[type]);
+    function showFloatingSpeech(node, msg) {
+      if (!node) return;
+      floatingSpeech.innerText = msg;
+      floatingSpeech.style.left = node.x + 'px';
+      floatingSpeech.style.top = node.y + 'px';
+      floatingSpeech.classList.add('visible');
+    }
+    
+    function hideFloatingSpeech() {
+      floatingSpeech.classList.remove('visible');
+    }
 
-  let order;
-  if (type === 'inorder')   order = inorder(root);
-  else if (type === 'preorder') order = preorder(root);
-  else order = postorder(root);
+    function drawEdge(n1, n2, isActive = false) {
+      const id = `edge-${n1.value}-${n2.value}`;
+      let line = document.getElementById(id);
+      if (!line) {
+        line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.id = id;
+        line.classList.add('edge');
+        edgesLayer.appendChild(line);
+      }
+      line.setAttribute('x1', n1.x);
+      line.setAttribute('y1', n1.y);
+      line.setAttribute('x2', n2.x);
+      line.setAttribute('y2', n2.y);
+      if (isActive) line.classList.add('active');
+      else line.classList.remove('active');
+      return line;
+    }
 
-  for (let i = 0; i < order.length; i++) {
-    let hl = {};
-    order.slice(0, i).forEach(v => hl[v] = 'visited');
-    hl[order[i]] = 'traversal';
-    render(hl);
-    await delay(Math.max(180, animSpeed() * 0.65));
-  }
+    function removeEdge(n1, n2) {
+      if(!n1 || !n2) return;
+      const id = `edge-${n1.value}-${n2.value}`;
+      const line = document.getElementById(id);
+      if (line) line.remove();
+    }
 
-  document.getElementById('tr-' + type).textContent = order.join(' → ');
-  render();
-  tutor(`${type.charAt(0).toUpperCase() + type.slice(1)} complete: [${order.join(', ')}]`);
-  setBusy(false);
-}
+    // ========== DATA STRUCTURES ==========
+    class TreeNode {
+      constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+        this.x = 0;
+        this.y = 0;
+        this.element = null;
+      }
+    }
 
-// ==================== PUBLIC ACTIONS ====================
+    // Create a DOM node
+    function createNodeElement(value) {
+      const div = document.createElement('div');
+      div.className = 'node inserting';
+      div.innerText = value;
+      nodesLayer.appendChild(div);
+      return div;
+    }
 
-window.doInsert = function() {
-  let v = parseInt(document.getElementById('val-input').value);
-  if (isNaN(v)) { tutor('Please enter a valid integer.'); return; }
-  document.getElementById('val-input').value = '';
-  animatedInsert(v);
-};
+    // ========== RENDERING ENGINE ==========
+    // Calculate positions based on inorder traversal depth logic
+    function calculatePositions() {
+      if (!treeRoot) return;
+      const canvasWidth = document.getElementById('visArea').clientWidth;
+      const startY = 60;
+      
+      // Determine tree depth
+      function getDepth(node) {
+        if (!node) return 0;
+        return 1 + Math.max(getDepth(node.left), getDepth(node.right));
+      }
+      const maxDepth = getDepth(treeRoot);
+      
+      function setPos(node, depth, leftBoundary, rightBoundary) {
+        if (!node) return;
+        const x = (leftBoundary + rightBoundary) / 2;
+        const y = startY + (depth * Config.levelHeight);
+        
+        node.x = x;
+        node.y = y;
+        if (node.element) {
+          node.element.style.left = `${x}px`;
+          node.element.style.top = `${y}px`;
+        }
+        
+        setPos(node.left, depth + 1, leftBoundary, x);
+        setPos(node.right, depth + 1, x, rightBoundary);
+      }
+      
+      setPos(treeRoot, 0, 0, canvasWidth);
+      redrawEdges();
+    }
 
-window.doDelete = function() {
-  let v = parseInt(document.getElementById('val-input').value);
-  if (isNaN(v)) { tutor('Please enter a valid integer.'); return; }
-  document.getElementById('val-input').value = '';
-  animatedDelete(v);
-};
+    function redrawEdges() {
+      edgesLayer.innerHTML = ''; // clear all
+      function traverseDraw(node) {
+        if (!node) return;
+        if (node.left) {
+          drawEdge(node, node.left);
+          traverseDraw(node.left);
+        }
+        if (node.right) {
+          drawEdge(node, node.right);
+          traverseDraw(node.right);
+        }
+      }
+      traverseDraw(treeRoot);
+    }
 
-window.doSearch = function() {
-  let v = parseInt(document.getElementById('val-input').value);
-  if (isNaN(v)) { tutor('Please enter a valid integer.'); return; }
-  animatedSearch(v);
-};
+    // Resize handler
+    window.addEventListener('resize', () => {
+      if (!isAnimating) calculatePositions();
+    });
 
-window.doTraversal = function(type) { animatedTraversal(type); };
+    // ========== CORE BST OPERATIONS ==========
+    
+    async function insertNode() {
+      const val = parseInt(nodeInput.value);
+      if (isNaN(val)) {
+        updateTutor("Please enter a valid number!");
+        return;
+      }
+      
+      setControlsState(true);
+      nodeInput.value = '';
+      updateTutor(`Starting insertion of ${val}...`);
+      addLog(`Inserting ${val}`, 'info');
 
-window.resetTree = function() {
-  if (busy) return;
-  root = null;
-  nodeEls = {}; edgeEls = {};
-  svg.innerHTML = '';
-  ['inorder','preorder','postorder'].forEach(t => document.getElementById('tr-' + t).textContent = '—');
-  render();
-  tutor('Tree reset! Start inserting values.');
-};
+      if (!treeRoot) {
+        treeRoot = new TreeNode(val);
+        treeRoot.element = createNodeElement(val);
+        calculatePositions();
+        updateTutor(`Tree was empty. Inserted ${val} as root.`);
+        addLog(`${val} became root`, 'success');
+        await sleep();
+      } else {
+        await insertRecursive(treeRoot, val);
+      }
 
-window.loadPreset = function() {
-  if (busy) return;
-  root = null; nodeEls = {}; edgeEls = {};
-  svg.innerHTML = '';
-  [50, 30, 70, 20, 40, 60, 80, 10, 35, 45].forEach(v => { root = insertBST(root, v); });
-  render();
-  ['inorder','preorder','postorder'].forEach(t => document.getElementById('tr-' + t).textContent = '—');
-  tutor('Sample BST loaded! Try: insert 55, delete 30 (two-children case), or run a traversal.');
-};
+      // Cleanup
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('active', 'found', 'inserting'));
+      redrawEdges();
+      hideFloatingSpeech();
+      setControlsState(false);
+      updateTutor("Insertion complete. What's next?");
+    }
 
-// Enter key
-document.getElementById('val-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') window.doInsert();
-});
+    async function insertRecursive(node, val) {
+      if (!node) return null;
+      
+      node.element.classList.add('active');
+      
+      if (val === node.value) {
+        updateTutor(`${val} is already in the tree! No duplicates allowed.`);
+        showFloatingSpeech(node, "I already exist!");
+        await sleep();
+        node.element.classList.remove('active');
+        return node;
+      }
 
-// Initial render
-render();
-</script>
+      if (val < node.value) {
+        updateTutor(`${val} < ${node.value}, so we go LEFT.`);
+        showFloatingSpeech(node, `${val} < ${node.value} \nGo Left ⬅️`);
+        await sleep();
+        
+        if (!node.left) {
+          updateTutor(`Found empty spot! Inserting ${val} to the left of ${node.value}.`);
+          const newNode = new TreeNode(val);
+          newNode.element = createNodeElement(val);
+          node.left = newNode;
+          calculatePositions(); // update layout
+          drawEdge(node, newNode, true);
+          await sleep();
+          node.element.classList.remove('active');
+          addLog(`Inserted ${val} left of ${node.value}`, 'success');
+          return newNode;
+        } else {
+          node.element.classList.remove('active');
+          drawEdge(node, node.left, true);
+          await sleep(Config.animationSpeedMs / 2);
+          redrawEdges();
+          return await insertRecursive(node.left, val);
+        }
+      } else {
+        updateTutor(`${val} > ${node.value}, so we go RIGHT.`);
+        showFloatingSpeech(node, `${val} > ${node.value} \nGo Right ➡️`);
+        await sleep();
+        
+        if (!node.right) {
+          updateTutor(`Found empty spot! Inserting ${val} to the right of ${node.value}.`);
+          const newNode = new TreeNode(val);
+          newNode.element = createNodeElement(val);
+          node.right = newNode;
+          calculatePositions();
+          drawEdge(node, newNode, true);
+          await sleep();
+          node.element.classList.remove('active');
+          addLog(`Inserted ${val} right of ${node.value}`, 'success');
+          return newNode;
+        } else {
+          node.element.classList.remove('active');
+          drawEdge(node, node.right, true);
+          await sleep(Config.animationSpeedMs / 2);
+          redrawEdges();
+          return await insertRecursive(node.right, val);
+        }
+      }
+    }
+
+    async function searchNode() {
+      const val = parseInt(nodeInput.value);
+      if (isNaN(val)) return;
+      
+      setControlsState(true);
+      updateTutor(`Searching for ${val}...`);
+      addLog(`Searching for ${val}`);
+      
+      let curr = treeRoot;
+      let found = false;
+      
+      while (curr) {
+        curr.element.classList.add('active');
+        if (val === curr.value) {
+          updateTutor(`Found ${val}!`);
+          showFloatingSpeech(curr, "Here I am! 🎉");
+          curr.element.classList.remove('active');
+          curr.element.classList.add('found');
+          addLog(`Found ${val}`, 'success');
+          found = true;
+          await sleep(Config.animationSpeedMs * 1.5);
+          break;
+        } else if (val < curr.value) {
+          updateTutor(`${val} < ${curr.value}, searching LEFT.`);
+          showFloatingSpeech(curr, "Check Left ⬅️");
+          await sleep();
+          curr.element.classList.remove('active');
+          if(curr.left) drawEdge(curr, curr.left, true);
+          await sleep(Config.animationSpeedMs / 2);
+          redrawEdges();
+          curr = curr.left;
+        } else {
+          updateTutor(`${val} > ${curr.value}, searching RIGHT.`);
+          showFloatingSpeech(curr, "Check Right ➡️");
+          await sleep();
+          curr.element.classList.remove('active');
+          if(curr.right) drawEdge(curr, curr.right, true);
+          await sleep(Config.animationSpeedMs / 2);
+          redrawEdges();
+          curr = curr.right;
+        }
+      }
+      
+      if (!found) {
+        updateTutor(`${val} is not in the tree.`);
+        addLog(`${val} not found`, 'warning');
+      }
+      
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('active', 'found'));
+      hideFloatingSpeech();
+      redrawEdges();
+      setControlsState(false);
+    }
+
+    // --- DELETION ---
+    async function deleteNode() {
+      const val = parseInt(nodeInput.value);
+      if (isNaN(val)) return;
+      
+      setControlsState(true);
+      nodeInput.value = '';
+      updateTutor(`Initiating deletion of ${val}...`);
+      addLog(`Deleting ${val}`);
+
+      const result = await findAndDelete(treeRoot, null, null, val);
+      if(result.rootUpdated) treeRoot = result.newRoot;
+      
+      if (!result.found) {
+        updateTutor(`Value ${val} not found to delete.`);
+        addLog(`Cannot delete: ${val} not found`, 'warning');
+      } else {
+        updateTutor(`Successfully deleted ${val}. Re-arranging tree...`);
+        calculatePositions();
+      }
+
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('active', 'found'));
+      hideFloatingSpeech();
+      setControlsState(false);
+    }
+
+    async function findAndDelete(node, parent, isLeftChild, val) {
+      if (!node) return { found: false, newRoot: null, rootUpdated: false };
+
+      node.element.classList.add('active');
+      
+      if (val < node.value) {
+        updateTutor(`${val} < ${node.value}, go left.`);
+        showFloatingSpeech(node, `Go left ⬅️`);
+        await sleep();
+        node.element.classList.remove('active');
+        const res = await findAndDelete(node.left, node, true, val);
+        if(res.rootUpdated) node.left = res.newRoot;
+        return { found: res.found, newRoot: node, rootUpdated: true };
+      } 
+      else if (val > node.value) {
+        updateTutor(`${val} > ${node.value}, go right.`);
+        showFloatingSpeech(node, `Go right ➡️`);
+        await sleep();
+        node.element.classList.remove('active');
+        const res = await findAndDelete(node.right, node, false, val);
+        if(res.rootUpdated) node.right = res.newRoot;
+        return { found: res.found, newRoot: node, rootUpdated: true };
+      } 
+      else {
+        // Node found
+        updateTutor(`Found ${val}! Let's determine deletion case...`);
+        showFloatingSpeech(node, `Uh oh, it's me! 💥`);
+        node.element.classList.replace('active', 'deleting');
+        await sleep();
+
+        // Case 1: Leaf
+        if (!node.left && !node.right) {
+          updateTutor(`Case 1: Node has no children. Simply removing it.`);
+          addLog(`${val} deleted (Leaf)`, 'success');
+          node.element.remove();
+          return { found: true, newRoot: null, rootUpdated: true };
+        }
+        // Case 2: One child (Right)
+        else if (!node.left) {
+          updateTutor(`Case 2: Node has only right child. Replacing node with its right child.`);
+          addLog(`${val} deleted (1 child)`, 'success');
+          node.element.remove();
+          return { found: true, newRoot: node.right, rootUpdated: true };
+        }
+        // Case 2: One child (Left)
+        else if (!node.right) {
+          updateTutor(`Case 2: Node has only left child. Replacing node with its left child.`);
+          addLog(`${val} deleted (1 child)`, 'success');
+          node.element.remove();
+          return { found: true, newRoot: node.left, rootUpdated: true };
+        }
+        // Case 3: Two children
+        else {
+          updateTutor(`Case 3: Node has two children. Finding Inorder Successor (smallest in right subtree).`);
+          addLog(`Deleting ${val} (2 children)`, 'warning');
+          
+          // Find successor
+          let succParent = node;
+          let succ = node.right;
+          
+          if(succ) succ.element.classList.add('active');
+          await sleep();
+
+          while (succ.left) {
+            updateTutor(`Moving left to find smallest...`);
+            succ.element.classList.remove('active');
+            succParent = succ;
+            succ = succ.left;
+            succ.element.classList.add('active');
+            await sleep();
+          }
+
+          updateTutor(`Successor found: ${succ.value}. Replacing ${node.value} with ${succ.value}.`);
+          showFloatingSpeech(succ, `I am the successor!`);
+          await sleep();
+
+          // Copy value and text
+          node.value = succ.value;
+          node.element.innerText = succ.value;
+          node.element.classList.remove('deleting'); // revive
+          node.element.classList.add('found');
+          
+          succ.element.classList.replace('active', 'deleting');
+          await sleep();
+          succ.element.remove();
+
+          // Remove successor from its old position
+          if (succParent === node) {
+            succParent.right = succ.right;
+          } else {
+            succParent.left = succ.right;
+          }
+
+          node.element.classList.remove('found');
+          return { found: true, newRoot: node, rootUpdated: true };
+        }
+      }
+    }
+
+    // --- TRAVERSALS ---
+    async function traverse(type) {
+      if(!treeRoot) {
+        updateTutor("Tree is empty!");
+        return;
+      }
+      setControlsState(true);
+      const outPanel = document.getElementById('traversalOutput');
+      const outCont = document.getElementById('traversalContainer');
+      const outLabel = document.getElementById('traversalLabel');
+      
+      outCont.innerHTML = '';
+      outLabel.innerText = `${type.charAt(0).toUpperCase() + type.slice(1)}: `;
+      outPanel.classList.add('visible');
+      
+      updateTutor(`Starting ${type} traversal...`);
+      addLog(`Started ${type} traversal`);
+      
+      if(type === 'inorder') await inorder(treeRoot, outCont);
+      else if(type === 'preorder') await preorder(treeRoot, outCont);
+      else if(type === 'postorder') await postorder(treeRoot, outCont);
+
+      updateTutor(`Traversal complete!`);
+      addLog(`Finished ${type} traversal`, 'success');
+      
+      setTimeout(() => {
+        outPanel.classList.remove('visible');
+      }, 5000);
+      
+      setControlsState(false);
+    }
+
+    function addTraversalItem(val, container) {
+      const span = document.createElement('span');
+      span.className = 'traversal-item';
+      span.innerText = val;
+      container.appendChild(span);
+    }
+
+    async function inorder(node, container) {
+      if(!node) return;
+      await inorder(node.left, container);
+      
+      node.element.classList.add('active');
+      showFloatingSpeech(node, "Visited! (L N R)");
+      addTraversalItem(node.value, container);
+      await sleep();
+      node.element.classList.remove('active');
+      hideFloatingSpeech();
+      
+      await inorder(node.right, container);
+    }
+
+    async function preorder(node, container) {
+      if(!node) return;
+      
+      node.element.classList.add('active');
+      showFloatingSpeech(node, "Visited! (N L R)");
+      addTraversalItem(node.value, container);
+      await sleep();
+      node.element.classList.remove('active');
+      hideFloatingSpeech();
+
+      await preorder(node.left, container);
+      await preorder(node.right, container);
+    }
+
+    async function postorder(node, container) {
+      if(!node) return;
+      await postorder(node.left, container);
+      await postorder(node.right, container);
+      
+      node.element.classList.add('active');
+      showFloatingSpeech(node, "Visited! (L R N)");
+      addTraversalItem(node.value, container);
+      await sleep();
+      node.element.classList.remove('active');
+      hideFloatingSpeech();
+    }
+
+    function resetTree() {
+      treeRoot = null;
+      nodesLayer.innerHTML = '';
+      edgesLayer.innerHTML = '';
+      logContainer.innerHTML = '';
+      updateTutor("Tree reset. Ready to start fresh!");
+    }
+
+    async function loadSampleTree() {
+      if (isAnimating) return;
+      resetTree();
+      updateTutor("Loading sample tree...");
+      setControlsState(true);
+      const sampleValues = [50, 30, 70, 20, 40, 60, 80];
+      for(let v of sampleValues) {
+          treeRoot = await (async function insertSilent(node, val) {
+            if(!node) {
+              let n = new TreeNode(val);
+              n.element = createNodeElement(val);
+              return n;
+            }
+            if(val < node.value) node.left = await insertSilent(node.left, val);
+            else node.right = await insertSilent(node.right, val);
+            return node;
+          })(treeRoot, v);
+      }
+      calculatePositions();
+      setControlsState(false);
+      updateTutor("Sample tree loaded! Try deleting or traversing it.");
+    }
+
+    // Initialization
+    updateTutor("Hi! I'm your tutor. Insert your first node to begin.");
+    // Pre-fill some data to show off
+    (async function initDemo() {
+       const initialValues = [50, 30, 70];
+       for(let v of initialValues) {
+           treeRoot = await (async function insertSilent(node, val) {
+             if(!node) {
+               let n = new TreeNode(val);
+               n.element = createNodeElement(val);
+               return n;
+             }
+             if(val < node.value) node.left = await insertSilent(node.left, val);
+             else node.right = await insertSilent(node.right, val);
+             return node;
+           })(treeRoot, v);
+       }
+       calculatePositions();
+    })();
+
+  </script>
 </body>
 </html>
