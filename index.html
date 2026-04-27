@@ -983,6 +983,14 @@
       chatMessages.appendChild(typingMsg);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
+      // Easter egg for class representative
+      if (text.toLowerCase().replace(/[^a-z\s]/g, '').includes("who is the representative of my class")) {
+        typingMsg.className = 'chat-msg ai';
+        typingMsg.innerHTML = "Divyansh or Maybe Aayushi";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return;
+      }
+
       try {
         const systemPrompt = "You are an expert Data Structures professor. Answer questions specifically about Binary Search Trees in a friendly, concise, and educational manner. Keep your answers brief to reply faster.";
         const encodedPrompt = encodeURIComponent(`${systemPrompt} User question: ${text}`);
