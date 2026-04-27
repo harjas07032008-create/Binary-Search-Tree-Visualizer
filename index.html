@@ -226,6 +226,9 @@
     .chat-msg { padding: 0.6rem; border-radius: 8px; max-width: 90%; line-height: 1.4; word-wrap: break-word; }
     .chat-msg.ai { background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary); align-self: flex-start; border-bottom-left-radius: 0; }
     .chat-msg.user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 0; }
+    .chat-msg code { background: rgba(0,0,0,0.2); padding: 0.1rem 0.3rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em; }
+    .chat-msg pre { background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; overflow-x: auto; margin-top: 0.5rem; margin-bottom: 0.5rem; font-family: var(--font-mono); font-size: 0.9em; }
+    [data-theme="light"] .chat-msg code, [data-theme="light"] .chat-msg pre { background: rgba(0,0,0,0.05); }
     .chat-input-area { display: flex; gap: 0.5rem; margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--edge-color); }
     .chat-input-area input { flex: 1; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--edge-color); background: var(--bg-color); color: var(--text-color); outline: none; }
     .chat-input-area button { padding: 0.5rem 0.75rem; border-radius: 6px; border: none; background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; }
@@ -981,15 +984,24 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
       try {
-        const systemPrompt = "You are an expert Data Structures professor. Answer questions specifically about Binary Search Trees in a friendly, concise, and educational manner.";
+        const systemPrompt = "You are an expert Data Structures professor. Answer questions specifically about Binary Search Trees in a friendly, concise, and educational manner. Keep your answers brief to reply faster.";
         const encodedPrompt = encodeURIComponent(`${systemPrompt} User question: ${text}`);
-        const response = await fetch(`https://text.pollinations.ai/${encodedPrompt}?model=openai`);
+        const response = await fetch(`https://text.pollinations.ai/${encodedPrompt}?model=openai&search=false`);
         
         if (!response.ok) throw new Error("Failed to fetch");
         
-        const aiText = await response.text();
+        let aiText = await response.text();
+        
+        // Parse basic markdown to HTML
+        aiText = aiText
+          .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/`(.*?)`/g, '<code>$1</code>')
+          .replace(/\n/g, '<br>');
+
         typingMsg.className = 'chat-msg ai';
-        typingMsg.innerText = aiText;
+        typingMsg.innerHTML = aiText;
       } catch (e) {
         typingMsg.className = 'chat-msg ai';
         typingMsg.style.color = 'var(--danger)';
